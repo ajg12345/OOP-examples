@@ -16,7 +16,7 @@ _glue = boto3.client(service_name="glue", region_name="us-east-1")
 _athena = boto3.client(service_name="athena", region_name="us-east-1")
 _ALLOWED_LOCATIONS = ("my_folder", "my_another_folder")
 _DEFAULT_BUCKET = "my_default_bucket"
-_home = expanduser("~")
+_home = os.path.expanduser("~")
 _today = datetime.date.today().isoformat().replace("-", "/")
 _yesterday = (
     (datetime.date.today() + dateutil.relativedelta.relativedelta(days=-1))
@@ -27,7 +27,7 @@ _lastmonth = (
     (datetime.date.today() + dateutil.relativedelta.relativedelta(months=-1))
     .isoformat()
     .replace("-", "/")
-
+)
 
 class AthenaTable:
     """
@@ -281,21 +281,21 @@ class AthenaTable:
 	    and generate pandas.DataFrames
 	    """
 	    if source_alias is None:
-		source_alias = table_name
-	    tbl = Trapezi(
-		"mgic_analytics", table_name, AccessType.OVERWRITE, SourceType.PRODUCTION
-	    )
-	    tbl.set_glue_dictionary()
+		    source_alias = table_name
+	        tbl = Trapezi(
+		    "mgic_analytics", table_name, AccessType.OVERWRITE, SourceType.PRODUCTION
+	        )
+	        tbl.set_glue_dictionary()
 	    if tbl.glue_definition:
-		pass
+    		pass
 	    else:
-		tbl.define_external("processed", "Incoming_MetaData")
+    		tbl.define_external("processed", "Incoming_MetaData")
 	    source_table = Trapezi(
 		"staging", source_alias, AccessType.OVERWRITE, SourceType.PRODUCTION
 	    )
 	    newfiles = [_ for _ in source_table.listen() if _.__contains__(_today)]
 	    if newfiles:
-		tbl.empty()
+		    tbl.empty()
 		for counter, source_path in enumerate(newfiles):
 		    write_parquet_path = f"s3://{tbl.table_bucket}/{tbl.s3_root}/{tbl.table_schema}/{tbl.table_name}/bulk_{str(counter).zfill(2)}.parquet"
 		    read_parquet_path = f"s3://{source_table.source_bucket}/{source_path}"
@@ -320,10 +320,10 @@ class AthenaTable:
 	    )
 	    tbl.set_glue_dictionary()
 	    if tbl.glue_definition:
-		pass
+		    pass
 	    else:
-		tbl.define_external("processed", "Incoming_MetaData")
-	    tbl.populate_from_source()
+    		tbl.define_external("processed", "Incoming_MetaData")
+	        tbl.populate_from_source()
 	    
 	    
 	    
